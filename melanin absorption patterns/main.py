@@ -45,4 +45,9 @@ def lin_model(data):
 
     return polyld_mgml, polyld_moll
 
+# %% Plot data with lin fit
+eu_1, eu_2 = lin_model(eu_data)
+plt.plot(eu_data[0], eu_data[1], 'bo', eu_data[0], eu_1(eu_data[0]), '--k')
+plt.xlim(350, 700)
+
 # %%
