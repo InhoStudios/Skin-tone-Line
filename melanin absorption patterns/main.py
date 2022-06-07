@@ -2,6 +2,7 @@
 from webhelper import get_data_from_web
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy.stats import linregress
 
 EUMELANIN_EXTCOEFF_URL = "https://omlc.org/spectra/melanin/eumelanin.html"
 PHEOMELANIN_EXTCOEFF_URL = "https://omlc.org/spectra/melanin/pheomelanin.html"
@@ -35,19 +36,48 @@ def lin_model(data):
     mg_ml = data[1]
     mol_l = data[2]
 
-    # generate fits
-    fit1 = np.polyfit(wavelen, mg_ml, 1)
-    fit2 = np.polyfit(wavelen, mol_l, 1)
+    m, b, r, p, s = linregress(wavelen, mg_ml)
+    linmodel_mgml = (m, b, r, p, s)
 
-    # create fit functions
-    polyld_mgml = np.polyld(fit1)
-    polyld_moll = np.polyld(fit2)
+    m, b, r, p, s = linregress(wavelen, mol_l)
+    linmodel_moll = (m, b, r, p, s)
 
-    return polyld_mgml, polyld_moll
+    return linmodel_mgml, linmodel_moll
 
-# %% Plot data with lin fit
+def lin_data(x, model):
+    return model[0] * x + model[1]
+
+
+# %% Get linear models for sets of data
 eu_1, eu_2 = lin_model(eu_data)
-plt.plot(eu_data[0], eu_data[1], 'bo', eu_data[0], eu_1(eu_data[0]), '--k')
-plt.xlim(350, 700)
 
+# %% Plot data for mgml
+plt.plot(eu_data[0], eu_data[1], 'bo', eu_data[0], lin_data(eu_data[0], eu_1), '--k')
+plt.xlim(350, 700)
+# %% Plot data for moll
+plt.plot(eu_data[0], eu_data[2], 'bo', eu_data[0], lin_data(eu_data[0], eu_2), '--k')
+plt.xlim(350, 700)
+# %% Create semilog linear model
+def log_lin_model(data):
+    wavelen = data[0]
+    mg_ml = np.log10(data[1])
+    mol_l = np.log10(data[2])
+
+    m, b, r, p, s = linregress(wavelen, mg_ml)
+    linmodel_mgml = (m, b, r, p, s)
+
+    m, b, r, p, s = linregress(wavelen, mol_l)
+    linmodel_moll = (m, b, r, p, s)
+
+    return linmodel_mgml, linmodel_moll
+# %% get semilog models
+semilog_eu_1, semilog_eu_2 = log_lin_model(eu_data)
+# %% plot semilog graphs with linear regression
+plt.plot(eu_data[0], np.log10(eu_data[1]), 'bo', eu_data[0], lin_data(eu_data[0], semilog_eu_1), '--k')
+plt.xlim(350, 700)
+# %%
+print (semilog_eu_1[0], semilog_eu_2[0])
+# %%
+plt.plot(eu_data[0], np.log10(eu_data[2]), 'bo', eu_data[0], lin_data(eu_data[0], semilog_eu_2), '--k')
+plt.xlim(350, 700)
 # %%
