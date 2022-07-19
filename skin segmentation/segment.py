@@ -1,3 +1,4 @@
+from cv2 import cvtColor
 import numpy as np
 import cv2
 from sklearn.cluster import KMeans
@@ -29,11 +30,11 @@ def remove_black(estimator_labels, estimator_cluster):
 
         if compare(color, [0, 0, 0]):
             del occurance_counter[x[0]]
-            hasBlack = True
+            has_black = True
             estimator_cluster = np.delete(estimator_cluster, x[0], 0)
             break
     
-    return (occurance_counter, estimator_cluster, hasBlack)
+    return (occurance_counter, estimator_cluster, has_black)
 
 def get_color_information(estimator_labels, estimator_cluster, thresholding=False):
     occurance_counter = None
@@ -106,12 +107,13 @@ image = cv2.imread('skin segmentation/test-images/hands3.jpeg')
 cv2.imshow('original image', image)
 
 skin = segment(image)
-cv2.imshow('segmented image', skin)
+cv2.imshow('segmented image', cv2.cvtColor(skin, cv2.COLOR_RGB2BGR))
 
-dom_colors = extract_dominant_color(skin, thresholding=True)
+dom_colors = extract_dominant_color(skin, colors=3, thresholding=True)
 colors = color_bar(dom_colors)
 
 cv2.imshow('colorbar', colors)
+print(cvtColor(colors, cv2.COLOR_BGR2HSV))
  
 cv2.waitKey(0)
 
