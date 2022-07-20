@@ -3,7 +3,8 @@ import numpy as np
 import cv2
 from sklearn.cluster import KMeans
 from collections import Counter
-import pprint
+from os import listdir
+from os.path import join
 
 def segment(image):
     img = image.copy()
@@ -103,18 +104,23 @@ def color_bar(color_info):
     
     return color_bar
 
-image = cv2.imread('skin segmentation/test-images/hands3.jpeg')
-cv2.imshow('original image', image)
+def get_avg_hue(img_list):
+    hues = []
+    for image in img_list:
+        colors = color_bar(extract_dominant_color(segment(image), colors=10, thresholding=True))
+        print('obtained colour')
+        hsv_colors = cvtColor(colors, cv2.COLOR_BGR2HSV)
+        point_avg = np.mean(hsv_colors[:, :, 0].flatten())
+        hues.append(point_avg)
+    return np.mean(hues)
 
-skin = segment(image)
-cv2.imshow('segmented image', cv2.cvtColor(skin, cv2.COLOR_RGB2BGR))
+def hue_as_angle(hue): return (hue/255) * 360
 
-dom_colors = extract_dominant_color(skin, colors=3, thresholding=True)
-colors = color_bar(dom_colors)
+path = "skin segmentation/test-images"
+imgs = []
+for img in listdir(path):
+    full_path = join(path, img)
+    imgs.append(cv2.imread(full_path))
 
-cv2.imshow('colorbar', colors)
-print(cvtColor(colors, cv2.COLOR_BGR2HSV))
- 
-cv2.waitKey(0)
-
-cv2.destroyAllWindows()
+hue = get_avg_hue(imgs)
+print(hue_as_angle(hue))
