@@ -116,11 +116,7 @@ def get_avg_hue(img_list):
 
 def hue_as_angle(hue): return (hue/255) * 360
 
-path = "skin segmentation/test-images"
-imgs = []
-for img in listdir(path):
-    full_path = join(path, img)
-    imgs.append(cv2.imread(full_path))
-
-hue = get_avg_hue(imgs)
-print(hue_as_angle(hue))
+img = cv2.imread('skin segmentation/test-images/1135_1.jpg')
+cv2.imshow("original", img)
+cv2.imshow("segmented", segment(img))
+cv2.waitKey(0)
