@@ -23,8 +23,6 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
     G_d = G_ori.copy()
     R_d = R_ori.copy()
 
-    max_resp = np.max([np.max(R_d), np.max(G_d), np.max(B_d)])
-
     # create empty image as base for detail layer
 
     B_c = np.zeros(np.shape(B_d)).astype(np.float32)
@@ -54,7 +52,7 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
         dispG = G_c.copy()
         dispB = B_c.copy()
 
-        I_c = cv2.merge([(dispB * 256).astype(np.uint8), (dispG * 256).astype(np.uint8), (dispR * 256).astype(np.uint8)])
+        I_c = cv2.merge([(dispB * 256 ).astype(np.uint8), (dispG * 256).astype(np.uint8), (dispR * 256).astype(np.uint8)])
 
         cv2.imshow("Detail image", I_c)
         cv2.waitKey(1)
@@ -71,9 +69,20 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
 
     # convert to uint8 image
 
-    B_c = (B_c * 256).astype(np.uint8)
-    G_c = (G_c * 256).astype(np.uint8)
-    R_c = (R_c * 256).astype(np.uint8)
+    # normalize image
+    scale = np.max([np.max(B_c), np.max(G_c), np.max(R_c)])
+
+    B_c = B_c / scale
+    G_c = G_c / scale
+    R_c = R_c / scale
+
+    B_c = B_c * uint8_size
+    G_c = G_c * uint8_size
+    R_c = R_c * uint8_size
+
+    B_c = B_c.astype(np.uint8)
+    G_c = G_c.astype(np.uint8)
+    R_c = R_c.astype(np.uint8)
 
     I_dt = cv2.merge([B_c, G_c, R_c])
     I_bs = np.subtract(I_ori, I_dt)
@@ -82,7 +91,7 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
 
 im = cv2.imread("log_transformed.jpg")
 cv2.imshow("Original image", im)
-I_dt, I_bs = apply_iterative_bilateral_filter(im, diam=50, maxIterations=10, sigmaColor=20)
+I_dt, I_bs = apply_iterative_bilateral_filter(im, diam=10, maxIterations=1000)
 cv2.imshow("Detail image", I_dt)
 cv2.imshow("Baseline image", I_bs)
 
