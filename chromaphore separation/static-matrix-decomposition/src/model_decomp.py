@@ -29,6 +29,14 @@ def decompose(image):
     hemoglobin = np.array(hemoglobin)
     return (melanin, hemoglobin)
 
+def calculate_melanin_index(image):
+    (melanin, hemoglobin) = decompose(image)
+    melanin_index = np.mean(melanin)
+    cv2.imshow("Melanin", melanin)
+    cv2.imshow("Hemoglobin", hemoglobin)
+    cv2.waitKey(0)
+    return melanin_index
+
 def process_images(path):
     images = []
     for file in listdir(path):
@@ -41,5 +49,8 @@ def process_images(path):
             cv2.imwrite(join(path, "/hemoglobin", h_file), h)
 
 if __name__ == "__main__":
-    path = "final_decomp_images"
-    process_images(path)
+    # path = "final_decomp_images"
+    # process_images(path)
+    path = "../data/melanin_index_test/fair.png"
+    im = cv2.imread(path)
+    print(calculate_melanin_index(im))
