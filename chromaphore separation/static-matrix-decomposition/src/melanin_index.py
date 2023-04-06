@@ -36,8 +36,9 @@ def process_images(image_dir):
     melanin_indices = []
     for file in listdir(image_dir):
         try:
-            spec_removed_img, spec_mask = remove_specular_from_image(fname)
-    pass
+            spec_removed_img, spec_mask = remove_specular_from_image(file)
+        except:
+            pass
 
 def main():
     csv_path = "../data/fitzpatrick17k.csv"
