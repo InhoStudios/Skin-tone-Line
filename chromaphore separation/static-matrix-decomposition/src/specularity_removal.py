@@ -14,7 +14,7 @@ def remove_specular_from_image(image_path, radius=12, inpaint_method = cv2.INPAI
     
     ret_img = cv2.inpaint(img, enlarged_spec, radius, inpaint_method)
 
-    return ret_img
+    return ret_img, spec_mask
 
 # impath = 'sample_image.jpg'
 # img = cv2.imread(impath)

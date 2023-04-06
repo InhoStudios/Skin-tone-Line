@@ -32,9 +32,6 @@ def decompose(image):
 def calculate_melanin_index(image):
     (melanin, hemoglobin) = decompose(image)
     melanin_index = np.mean(melanin)
-    cv2.imshow("Melanin", melanin)
-    cv2.imshow("Hemoglobin", hemoglobin)
-    cv2.waitKey(0)
     return melanin_index
 
 def process_images(path):

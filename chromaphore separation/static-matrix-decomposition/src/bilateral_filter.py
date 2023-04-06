@@ -37,7 +37,7 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
     # create video writer to watch process
 
     height, width, dims = I_ori.shape
-    detail = cv2.VideoWriter(f'{fname.split(".")[0]}.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 60, (width, height))
+    # detail = cv2.VideoWriter(f'{fname.split(".")[0]}.avi', cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'), 60, (width, height))
 
     for iterator in range(maxIterations):
 
@@ -65,15 +65,16 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
         dispG = G_c.copy()
         dispB = B_c.copy()
 
-        I_c = cv2.merge([(uint8_size * dispB).astype(np.uint8), 
-                         (uint8_size * dispG).astype(np.uint8), 
-                         (uint8_size * dispR).astype(np.uint8)])
-        detail.write(I_c)
+        # I_c = cv2.merge([(uint8_size * dispB).astype(np.uint8),
+        #                  (uint8_size * dispG).astype(np.uint8),
+        #                  (uint8_size * dispR).astype(np.uint8)])
+        # detail.write(I_c)
 
-        cv2.imshow("Detail image", I_c)
-        cv2.waitKey(1)
+        # cv2.imshow("Detail image", I_c)
+        # cv2.waitKey(1)
 
-        print("Iteration {} -- R: {}, G: {}, B: {}".format(iterator + 1, R_norm, G_norm, B_norm))
+        if (iterator % 50 == 0):
+            print("Iteration {} -- R: {}, G: {}, B: {}".format(iterator + 1, R_norm, G_norm, B_norm))
 
         if (B_norm <= atol and G_norm <= atol and R_norm <= atol):
             break
@@ -103,7 +104,7 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
     I_dt = cv2.merge([B_c, G_c, R_c])
     I_bs = I_ori - I_dt
 
-    detail.release()
+    # detail.release()
 
     return I_dt, I_bs
 
