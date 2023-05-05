@@ -2,25 +2,28 @@ import numpy as np
 import cv2
 from os.path import join
 
+UINT8_SIZE = 255.0
+
+def normalize(img_in):
+    return img_in / UINT8_SIZE
+
 def log_transform(img_in):
-    c = 255.0/(np.log(1 + 255))
-    img_out = (c*np.log(1 + img_in.astype(float))).astype(np.uint8)
+    img_out = -np.log(1 + img_in.astype(float))
     return img_out
 
 def antilog_transform(img_in):
-    c = c = 255.0/(np.log(1 + 255))
-    img_out = (np.exp(img_in.astype(float)) ** (1/c) - 1).astype(np.uint8)
+    img_out = np.exp(img_in.astype(float)) - 1
     return img_out
 
-def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, sigmaSpace=80, maxIterations=50, fname="detail."):
+def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, sigmaSpace=80, maxIterations=50):
     (B_ori, G_ori, R_ori) = cv2.split(I_ori)
     uint8_size = 255
 
     # convert to floating point with double precision and normalize
 
-    B_ori = B_ori.astype(np.float32) / uint8_size
-    G_ori = G_ori.astype(np.float32) / uint8_size
-    R_ori = R_ori.astype(np.float32) / uint8_size
+    B_ori = B_ori.astype(np.float32)
+    G_ori = G_ori.astype(np.float32)
+    R_ori = R_ori.astype(np.float32)
 
     # create diffuse layer copies
 
@@ -85,13 +88,6 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
             iterator += 1
 
     # convert to uint8 image
-
-    # normalize image
-    # scale = np.max([np.max(B_c), np.max(G_c), np.max(R_c)])
-
-    # B_c = B_c / scale
-    # G_c = G_c / scale
-    # R_c = R_c / scale
 
     B_c = B_c * uint8_size
     G_c = G_c * uint8_size
