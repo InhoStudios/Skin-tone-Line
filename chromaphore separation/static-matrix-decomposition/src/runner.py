@@ -6,6 +6,7 @@ from model_decomp import decompose
 from bilateral_filter import apply_iterative_bilateral_filter, log_transform, normalize
 from os.path import join
 from os import listdir
+from model_decomp import DecompositionMatrix
 
 def remove_specular_from_image(image_path, radius=12, inpaint_method = cv2.INPAINT_NS):
     img = cv2.imread(image_path)
@@ -22,29 +23,30 @@ def remove_specular_from_image(image_path, radius=12, inpaint_method = cv2.INPAI
     return ret_img, spec_mask
 
 if __name__ == "__main__":
-    fname = "../data/final_decomp_images/DSC_0159.jpg"
+    mat = DecompositionMatrix();
+    fname = "../data/sample_img.jpeg"
     im = cv2.imread(fname)
-    cv2.imshow("Original image", im)
+    # cv2.imshow("Original image", im)
     spec_removed_im, spec_mask = remove_specular_from_image(fname)
-    norm_im = normalize(spec_removed_im)
-    cv2.imshow("Normalized Image", norm_im)
-    log_im = log_transform(norm_im)
+    # norm_im = normalize(spec_removed_im)
+    # cv2.imshow("Normalized Image", norm_im)
+    log_im = log_transform(spec_removed_im)
     cv2.imshow("Negative Log Image", log_im)
-    I_dt, I_bs = apply_iterative_bilateral_filter(log_im, diam=15, sigmaColor=80, sigmaSpace=10, maxIterations=4000)
-    cv2.imshow("Detail", I_dt)
-    (m_img, h_img) = decompose(I_dt)
+    # I_dt, I_bs = apply_iterative_bilateral_filter(log_im, diam=15, sigmaColor=10, sigmaSpace=10, maxIterations=1000)
+    # cv2.imshow("Detail", I_dt)
+    (m_img, h_img) = decompose(log_im)
     cv2.waitKey(0)
             
-    m_file = "../data/3_melanin.jpeg"
-    h_file = "../data/3_hemoglobin.jpeg"
+    m_file = "../data/4_melanin.jpeg"
+    h_file = "../data/4_hemoglobin.jpeg"
     # spec_removed_file = "../data/2_spec_removed.jpeg"
     # mask_file = "../data/2_spec_mask.jpeg"
     # log_img_file = "../data/2_log_img.jpeg"
     # detail_file = "../data/2_im_detail.jpeg"
     # baseline_file = "../data/2_im_bs.jpeg"
 
-    cv2.imwrite(m_file, m_img)
-    cv2.imwrite(h_file, h_img)
+    # cv2.imwrite(m_file, m_img)
+    # cv2.imwrite(h_file, h_img)
     # cv2.imwrite(spec_removed_file, spec_removed_im)
     # cv2.imwrite(mask_file, spec_mask)
     # cv2.imwrite(log_img_file, log_img)

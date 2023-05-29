@@ -12,7 +12,7 @@ def parse_data_tsv(data_string):
         unit = row.split('\t')
         data.append(unit)
     # convert to float, transpose into 3 rows
-    return np.array(data).astype(np.float)
+    return np.array(data).astype(float)
 
 def get_data_from_web(data_url):
     data_src = requests.get(data_url, headers=HEADERS, verify=False)
