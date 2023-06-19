@@ -10,9 +10,12 @@ decomp_mat = np.array([[0.176, 0.747, 1.042], [0.086, 0.352, -0.488]])
 #                     img[:,:,0]-img[:,:,2],
 #                     img[:,:,0]-img[:,:,1]])
 
-RED = 612
-GREEN = 549
-BLUE = 465
+# RED = 612
+# GREEN = 549
+# BLUE = 465
+RED = 650
+GREEN = 550
+BLUE = 450
 # path length estimates
 L_R = 10.2e-1
 L_G = 4.9e-1

@@ -8,7 +8,7 @@ def normalize(img_in):
     return img_in / UINT8_SIZE
 
 def log_transform(img_in):
-    img_out = -np.log(1 + img_in.astype(float))
+    img_out = -np.log(0.001 + img_in.astype(float))
     return img_out
 
 def antilog_transform(img_in):
@@ -68,13 +68,13 @@ def apply_iterative_bilateral_filter(I_ori, atol=0.05, diam=50, sigmaColor=80, s
         dispG = G_c.copy()
         dispB = B_c.copy()
 
-        # I_c = cv2.merge([(uint8_size * dispB).astype(np.uint8),
-        #                  (uint8_size * dispG).astype(np.uint8),
-        #                  (uint8_size * dispR).astype(np.uint8)])
+        I_c = cv2.merge([(uint8_size * dispB).astype(np.uint8),
+                         (uint8_size * dispG).astype(np.uint8),
+                         (uint8_size * dispR).astype(np.uint8)])
         # detail.write(I_c)
 
-        # cv2.imshow("Detail image", I_c)
-        # cv2.waitKey(1)
+        cv2.imshow("Detail image", I_c)
+        cv2.waitKey(1)
 
         if (iterator % 50 == 0):
             print("Iteration {} -- R: {}, G: {}, B: {}".format(iterator + 1, R_norm, G_norm, B_norm))
