@@ -20,6 +20,8 @@ dist/
 # Persist Dir
 data/
 
+venv/
+
 # Normal Things
 .DS_Store
 .env
