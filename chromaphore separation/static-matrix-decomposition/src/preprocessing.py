@@ -12,7 +12,10 @@ def normalize(image):
 
 
 def normalized(image):
-    return max(image) <= 1 and min(image) >= 0
+    (b, g, r) = cv2.split(image)
+    max_pix = np.max([np.max(b), np.max(g), np.max(r)])
+    min_pix = np.min([np.min(b), np.min(g), np.min(r)])
+    return max_pix <= 1 and min_pix >= 0
 
 def log_transform(image):
     return np.log(0.000001 + image.astype(np.float32))
@@ -44,14 +47,17 @@ def remove_specular_from_img(image_path, radius=12, inpaint_method=cv2.INPAINT_N
 def create_float32_zeros_base(image):
     return np.zeros(image.shape).astype(np.float32)
 
-def apply_iterative_bilateral_filter(image, atol=0.05, diam=50, sigmaColor=10, sigmaSpace=16, maxIterations=100):
+def apply_iterative_bilateral_filter(image, atol=0.05, diam=75, sigmaColor=10, sigmaSpace=25, maxIterations=100):
+    # check normalized
+    normalize(image)
+
     (B_ori, G_ori, R_ori) = cv2.split(image)
     
     B_ori, G_ori, R_ori = convert_to_float32_img(B_ori), convert_to_float32_img(G_ori), convert_to_float32_img(R_ori)
 
     B_d, G_d, R_d = B_ori.copy(), G_ori.copy(), R_ori.copy()
 
-    [B_c, G_c, R_c] = create_float32_zeros_base(image)
+    B_c, G_c, R_c = create_float32_zeros_base(B_ori), create_float32_zeros_base(G_ori), create_float32_zeros_base(R_ori)
 
     for iterator in range(maxIterations):
 

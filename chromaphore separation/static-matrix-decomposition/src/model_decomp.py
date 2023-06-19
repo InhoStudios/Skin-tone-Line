@@ -158,7 +158,7 @@ def process_images(path):
         img = cv2.imread(join(path,file))
         if img is not None:
             (m, h) = decompose(img)
-            m_file = file.split('.')[0] + "_m." + file.split('.')[1]
+            m_file = file.split('0 .')[0] + "_m." + file.split('.')[1]
             h_file = file.split('.')[0] + "_h." + file.split('.')[1]
             cv2.imwrite(join(path, "/melanin", m_file), m)
             cv2.imwrite(join(path, "/hemoglobin", h_file), h)

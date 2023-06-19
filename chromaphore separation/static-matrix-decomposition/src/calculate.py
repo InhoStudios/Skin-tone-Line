@@ -1,7 +1,7 @@
 import numpy as np
 import cv2
 
-def calc_static_matrix_decomposition(image):
+def static_matrix_decomposition(image):
     """
     Applies static matrix decomposition to an image and obtains hemoglobin and melanin component images
 
@@ -32,8 +32,8 @@ def calc_static_matrix_decomposition(image):
     hemoglobin = np.array(hemoglobin)
     return (melanin, hemoglobin)
 
-def calc_mean_melanin_score(melanin_image):
+def melanin_score(melanin_image):
     return np.mean(melanin_image)
 
-def calc_mean_hemoglobin_score(hemoglobin_image):
+def hemoglobin_score(hemoglobin_image):
     return np.mean(hemoglobin_image)
