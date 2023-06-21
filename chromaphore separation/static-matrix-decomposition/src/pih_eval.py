@@ -3,16 +3,18 @@ import pandas as pd
 import cv2
 import preprocessing as p
 import calculate as calc
+import matplotlib.pyplot as plt
 from os.path import join
 from os import listdir, makedirs
 
-WORKDIR = "../output"
+WORKDIR = "/scratch/st-tklee-1/ndsz/stl/output"
 DATADIR = "../data/PIH Study - Image Analysis"
 METADATA_DIR = "../data/PIH Study - Image Analysis/PIH_CM_IS_Fiber_Demographics_Lab_Melanin.xlsx"
 
 if __name__ == "__main__":
     makedirs(WORKDIR, exist_ok=True)
-    chromameter_vals = []
+    is_mels = []
+    fib_mels = []
     calc_vals = []
 
     dfs = pd.read_excel(METADATA_DIR, sheet_name=None)
@@ -39,13 +41,32 @@ if __name__ == "__main__":
 
             # im = p.remove_specular_from_img(img_file, radius=15)
 
+            dt_file = join(WORKDIR, f"detail_{img}")
+            m_file = join(WORKDIR, f"melanin_{img}")
+            h_file = join(WORKDIR, f"hemoglobin_{img}")
+
             im = p.normalize(image)
             im = p.log_transform(im)
             im_dt, im_bs = p.apply_iterative_bilateral_filter(im)
-            im_m, im_h = p.decompose(im_dt)
+            cv2.imwrite(dt_file, im_dt)
+            im_m, im_h = calc.static_matrix_decomposition(im_dt)
             
             m_index = calc.melanin_score(im_m)
-            print(m_index)
+
+            is_mels.append(is_mel)
+            fib_mels.append(fib_mel)
+            calc_vals.append(m_index)
+
+            cv2.imwrite(m_file, im_m)
+            cv2.imwrite(h_file, im_h)
+
+            data = np.asarray([calc_vals, is_mels, fib_mels])
+            np.savetxt(join(WORKDIR, "meta.csv"), data, delimiter=",")
 
             break
-        break
+    
+    plt.plot(calc_vals, label="Calculated Melanin Values")
+    plt.plot(is_mels, label="Integrating Sphere Melanin Values")
+    plt.plot(fib_mels, label="Fiber Melanin Values")
+    plt.legend()
+    plt.savefig(join(WORKDIR), "correlations.jpg")

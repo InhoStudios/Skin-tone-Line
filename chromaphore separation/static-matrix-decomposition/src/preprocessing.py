@@ -1,6 +1,7 @@
 import numpy as np
 from os.path import join
 import cv2
+import torchvision.transforms as tv
 import specularity as spc
 
 UINT8_SIZE = 255.0
@@ -47,7 +48,7 @@ def remove_specular_from_img(image_path, radius=12, inpaint_method=cv2.INPAINT_N
 def create_float32_zeros_base(image):
     return np.zeros(image.shape).astype(np.float32)
 
-def apply_iterative_bilateral_filter(image, atol=0.05, diam=75, sigmaColor=10, sigmaSpace=25, maxIterations=100):
+def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, sigmaSpace=5, maxIterations=1000):
     # check normalized
     normalize(image)
 
@@ -81,20 +82,20 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=75, sigmaColor=10, s
         G_norm = np.max(np.abs(B_d - B_dp))
         R_norm = np.max(np.abs(B_d - B_dp))
 
-        dispR = R_c.copy()
-        dispG = G_c.copy()
-        dispB = B_c.copy()
+        # dispR = R_c.copy()
+        # dispG = G_c.copy()
+        # dispB = B_c.copy()
 
-        I_c = cv2.merge([(UINT8_SIZE * dispB).astype(np.uint8),
-                         (UINT8_SIZE * dispG).astype(np.uint8),
-                         (UINT8_SIZE * dispR).astype(np.uint8)])
-        # detail.write(I_c)
+        # I_c = cv2.merge([(UINT8_SIZE * dispB).astype(np.uint8),
+        #                  (UINT8_SIZE * dispG).astype(np.uint8),
+        #                  (UINT8_SIZE * dispR).astype(np.uint8)])
+        # # detail.write(I_c)
 
-        cv2.imshow("Detail image", I_c)
-        cv2.waitKey(1)
+        # cv2.imshow("Detail image", I_c)
+        # cv2.waitKey(1)
 
         if (iterator % 50 == 0):
-            print("Iteration {} -- R: {}, G: {}, B: {}".format(iterator + 1, R_norm, G_norm, B_norm))
+            print("Iteration {} -- R: {}, G: {}, B: {}".format(iterator, R_norm, G_norm, B_norm))
 
         if (B_norm <= atol and G_norm <= atol and R_norm <= atol):
             break
