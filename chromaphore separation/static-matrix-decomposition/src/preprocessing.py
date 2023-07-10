@@ -3,6 +3,8 @@ from os.path import join
 import cv2
 import torchvision.transforms as tv
 import specularity as spc
+# import taichi as ti
+# import taichi.math as tm
 
 UINT8_SIZE = 255.0
 
@@ -62,6 +64,9 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, s
 
     for iterator in range(maxIterations):
 
+        # B_dp = cv2.bilateralFilter(B_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
+        # G_dp = cv2.bilateralFilter(G_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
+        # R_dp = cv2.bilateralFilter(R_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
         B_dp = cv2.bilateralFilter(B_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
         G_dp = cv2.bilateralFilter(G_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
         R_dp = cv2.bilateralFilter(R_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
@@ -120,3 +125,9 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, s
 
 
     return I_dt, I_bs
+
+# @ti.kernel
+# def bilateral_filter(img, sigma_s, sigma_r):
+#     n, m = img.shape[0], img.shape[1]
+
+#     blur_radius_s = ti.

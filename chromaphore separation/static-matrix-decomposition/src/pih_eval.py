@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from os.path import join
 from os import listdir, makedirs
 
-WORKDIR = "/scratch/st-tklee-1/ndsz/stl/output"
+WORKDIR = "/scratch/st-tklee-1/ndsz/stl/test"
 DATADIR = "../data/PIH Study - Image Analysis"
 METADATA_DIR = "../data/PIH Study - Image Analysis/PIH_CM_IS_Fiber_Demographics_Lab_Melanin.xlsx"
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
 
             im = p.normalize(image)
             im = p.log_transform(im)
-            im_dt, im_bs = p.apply_iterative_bilateral_filter(im)
+            im_dt, im_bs = p.apply_iterative_bilateral_filter(im, diam=15, sigmaColor=80, sigmaSpace=10, maxIterations=30000)
             cv2.imwrite(dt_file, im_dt)
             im_m, im_h = calc.static_matrix_decomposition(im_dt)
             
@@ -64,6 +64,7 @@ if __name__ == "__main__":
             np.savetxt(join(WORKDIR, "meta.csv"), data, delimiter=",")
 
             break
+        break
     
     plt.plot(calc_vals, label="Calculated Melanin Values")
     plt.plot(is_mels, label="Integrating Sphere Melanin Values")
