@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 import cv2
 import preprocessing as p
+from colour_constancy import shades_of_grey as sog
 import calculate as calc
 import matplotlib.pyplot as plt
 from os.path import join
@@ -37,6 +38,7 @@ if __name__ == "__main__":
                 continue
             img_file = join(img_dir, img)
             image = cv2.imread(img_file)
+            image = sog(image, 6)
             print(img_file)
 
             # im = p.remove_specular_from_img(img_file, radius=15)
@@ -47,7 +49,8 @@ if __name__ == "__main__":
 
             im = p.normalize(image)
             im = p.log_transform(im)
-            im_dt, im_bs = p.apply_iterative_bilateral_filter(im, diam=15, sigmaColor=80, sigmaSpace=10, maxIterations=30000)
+            # im_dt, im_bs = p.apply_iterative_bilateral_filter(im, diam=15, sigmaColor=80, sigmaSpace=10, maxIterations=30000)
+            im_dt, im_bs = p.hsv_shading_removal(im)
             cv2.imwrite(dt_file, im_dt)
             im_m, im_h = calc.static_matrix_decomposition(im_dt)
             
@@ -63,11 +66,26 @@ if __name__ == "__main__":
             data = np.asarray([calc_vals, is_mels, fib_mels])
             np.savetxt(join(WORKDIR, "meta.csv"), data, delimiter=",")
 
-            break
-        break
+            fig, axs = plt.subplots(2, 2, figsize=(20,20))
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            axs[0, 0].imshow(image)
+            axs[0, 0].set_title("Original Image")
+            axs[0, 0].axis("off")
+            axs[0, 1].imshow(im_dt)
+            axs[0, 1].set_title("Detail Image")
+            axs[0, 1].axis("off")
+            axs[1, 0].imshow(im_m)
+            axs[1, 0].set_title("Melanin Image")
+            axs[1, 0].axis("off")
+            axs[1, 1].imshow(im_h)
+            axs[1, 1].set_title("Hemoglobin Image")
+            axs[1, 1].axis("off")
+
+            fig.tight_layout()
+            plt.savefig(join(WORKDIR, f"comparison_{img}"))
+            
     
-    plt.plot(calc_vals, label="Calculated Melanin Values")
-    plt.plot(is_mels, label="Integrating Sphere Melanin Values")
-    plt.plot(fib_mels, label="Fiber Melanin Values")
-    plt.legend()
-    plt.savefig(join(WORKDIR), "correlations.jpg")
+    # plt.scatter(calc_vals, is_mels, label="Calculated Melanin Values")
+    # plt.scatter(calc_vals, fib_mels, label="Fiber Melanin Values")
+    # plt.legend()
+    # plt.savefig(join(WORKDIR, "correlations.png"))

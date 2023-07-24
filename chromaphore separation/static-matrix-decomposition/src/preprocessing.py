@@ -50,6 +50,16 @@ def remove_specular_from_img(image_path, radius=12, inpaint_method=cv2.INPAINT_N
 def create_float32_zeros_base(image):
     return np.zeros(image.shape).astype(np.float32)
 
+def hsv_shading_removal(image):
+    hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    mean_v = np.mean(hsv_img[:,:,2])
+    hsv_img[:,:,2] = np.uint8(mean_v)
+    I_dt = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+    I_bs = image - I_dt
+
+    return I_dt, I_bs
+
+
 def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, sigmaSpace=5, maxIterations=1000):
     # check normalized
     normalize(image)
