@@ -28,7 +28,7 @@ def download_images(data):
 
         img_bytes = requests.get(url, headers=HEADERS).content
 
-        with (open(compiled_filename, 'wb') as image):
+        with open(compiled_filename, 'wb') as image:
             image.write(img_bytes)
         break
 

@@ -3,6 +3,7 @@ from os.path import join
 import cv2
 import torchvision.transforms as tv
 import specularity as spc
+from gputools.denoise import bilateral2
 # import taichi as ti
 # import taichi.math as tm
 
@@ -21,7 +22,8 @@ def normalized(image):
     return max_pix <= 1 and min_pix >= 0
 
 def log_transform(image):
-    return np.log(0.000001 + image.astype(np.float32))
+    c = 255.0 / (np.log(1 + 255))
+    return (c * np.log(1 + image.astype(float))).astype(np.uint8)
 
 def neg_log_transform(image):
     return -log_transform(image)
@@ -52,9 +54,11 @@ def create_float32_zeros_base(image):
 
 def hsv_shading_removal(image):
     hsv_img = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    flattened_values = cv2.bilateralFilter(hsv_img[:, :, 2], 80, 50, 26)
     mean_v = np.mean(hsv_img[:,:,2])
-    hsv_img[:,:,2] = np.uint8(mean_v)
-    I_dt = cv2.cvtColor(image, cv2.COLOR_HSV2BGR)
+    print(mean_v)
+    hsv_img[:,:,2] = flattened_values
+    I_dt = cv2.cvtColor(hsv_img, cv2.COLOR_HSV2BGR)
     I_bs = image - I_dt
 
     return I_dt, I_bs
@@ -77,9 +81,9 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, s
         # B_dp = cv2.bilateralFilter(B_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
         # G_dp = cv2.bilateralFilter(G_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
         # R_dp = cv2.bilateralFilter(R_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
-        B_dp = cv2.bilateralFilter(B_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
-        G_dp = cv2.bilateralFilter(G_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
-        R_dp = cv2.bilateralFilter(R_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
+        B_dp = bilateral2(B_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
+        G_dp = bilateral2(G_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
+        R_dp = bilateral2(R_d, diam, sigmaColor/UINT8_SIZE, sigmaSpace)
 
         B_c = B_c + B_d - B_dp
         G_c = G_c + G_d - G_dp
@@ -135,9 +139,3 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, s
 
 
     return I_dt, I_bs
-
-# @ti.kernel
-# def bilateral_filter(img, sigma_s, sigma_r):
-#     n, m = img.shape[0], img.shape[1]
-
-#     blur_radius_s = ti.
