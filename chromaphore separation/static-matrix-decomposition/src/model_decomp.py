@@ -129,23 +129,18 @@ def decompose(image):
     (melanin, hemoglobin): Tuple containing a greyscale melanin and hemoglobin image
     """
     decomp_mat = np.array([[0.176, 0.747, 1.042], [0.086, 0.352, -0.488]])
-    melanin = []
-    hemoglobin = []
-    for y in image:
-        mrow = []
-        hrow = []
-        for x in y:
-            pixel_vec = np.array([int(x[1])-int(x[2]),
-                                int(x[0])-int(x[2]),
-                                int(x[0])-int(x[1])])
-            decomp = np.dot(decomp_mat, pixel_vec)
-            mrow.append(np.abs(decomp[0]).astype(np.uint8))
-            hrow.append(np.abs(decomp[1]).astype(np.uint8))
-        melanin.append(mrow)
-        hemoglobin.append(hrow)
-    melanin = np.array(melanin)
-    hemoglobin = np.array(hemoglobin)
-    return (melanin, hemoglobin)
+
+    diff_blue_green = image[:, :, 1] - image[:, :, 2]
+    diff_blue_red = image[:, :, 0] - image[:, :, 2]
+    diff_green_red = image[:, :, 0] - image[:, :, 1]
+    pixel_vec = np.stack((diff_blue_green, diff_blue_red, diff_green_red), axis=-1)
+
+    decomp = np.dot(pixel_vec, decomp_mat.T)
+
+    melanin = np.abs(decomp[:, :, 0])
+    hemoglobin = np.abs(decomp[:, :, 1])
+
+    return melanin, hemoglobin
 
 def calculate_melanin_index(image):
     (melanin, hemoglobin) = decompose(image)

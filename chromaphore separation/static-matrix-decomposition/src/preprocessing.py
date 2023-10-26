@@ -4,6 +4,7 @@ import cv2
 import torchvision.transforms as tv
 import specularity as spc
 from gputools.denoise import bilateral2
+from colour_constancy import shades_of_grey as sog
 # import taichi as ti
 # import taichi.math as tm
 
@@ -22,8 +23,8 @@ def normalized(image):
     return max_pix <= 1 and min_pix >= 0
 
 def log_transform(image):
-    c = 255.0 / (np.log(1 + 255))
-    return (c * np.log(1 + image.astype(float))).astype(np.uint8)
+    epsilon = 1.0/255.0
+    return np.log(epsilon + image.astype(np.float32))
 
 def neg_log_transform(image):
     return -log_transform(image)
@@ -63,10 +64,16 @@ def hsv_shading_removal(image):
 
     return I_dt, I_bs
 
+def process_image_pipeline(input_file_path):
+    image, mask = remove_specular_from_img(input_file_path, radius=12)
+    image = sog(image, 6)
+
+    pass
 
 def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, sigmaSpace=5, maxIterations=1000):
     # check normalized
-    normalize(image)
+    C = -np.log(1.0/255.0)
+    image = image.astype(np.float32) / C
 
     (B_ori, G_ori, R_ori) = cv2.split(image)
     
@@ -89,13 +96,13 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, s
         G_c = G_c + G_d - G_dp
         R_c = R_c + R_d - R_dp
 
-        B_c[B_c < 0] = 0
-        G_c[G_c < 0] = 0
-        R_c[R_c < 0] = 0
+        # B_c[B_c < 0] = 0
+        # G_c[G_c < 0] = 0
+        # R_c[R_c < 0] = 0
         
-        B_c[B_c > 1] = 1
-        G_c[G_c > 1] = 1
-        R_c[R_c > 1] = 1
+        # B_c[B_c > 1] = 1
+        # G_c[G_c > 1] = 1
+        # R_c[R_c > 1] = 1
 
         B_norm = np.max(np.abs(B_d - B_dp))
         G_norm = np.max(np.abs(B_d - B_dp))
@@ -113,10 +120,11 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, s
         # cv2.imshow("Detail image", I_c)
         # cv2.waitKey(1)
 
-        if (iterator % 50 == 0):
+        if (iterator % 100 == 0):
             print("Iteration {} -- R: {}, G: {}, B: {}".format(iterator, R_norm, G_norm, B_norm))
 
         if (B_norm <= atol and G_norm <= atol and R_norm <= atol):
+            print("Terminating at iteration {} -- R: {}, G: {}, B: {}".format(iterator, R_norm, G_norm, B_norm))
             break
         else:
             B_d = np.abs(B_ori - B_c)
@@ -126,16 +134,15 @@ def apply_iterative_bilateral_filter(image, atol=0.05, diam=15, sigmaColor=10, s
 
     # convert to uint8 image
 
-    B_c = B_c * UINT8_SIZE
-    G_c = G_c * UINT8_SIZE
-    R_c = R_c * UINT8_SIZE
+    # B_c = B_c * UINT8_SIZE
+    # G_c = G_c * UINT8_SIZE
+    # R_c = R_c * UINT8_SIZE
 
-    B_c = B_c.astype(np.uint8)
-    G_c = G_c.astype(np.uint8)
-    R_c = R_c.astype(np.uint8)
+    # B_c = B_c.astype(np.uint8)
+    # G_c = G_c.astype(np.uint8)
+    # R_c = R_c.astype(np.uint8)
 
     I_dt = cv2.merge([B_c, G_c, R_c])
     I_bs = image - I_dt
 
-
-    return I_dt, I_bs
+    return C * I_dt, C * I_bs
